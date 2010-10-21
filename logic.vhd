@@ -38,7 +38,7 @@ architecture behavioral of logic is
 		signal s_r_paddle : integer range 0 to 480 := 0;
 		signal s_ball_x : integer range 0 to 640 := 320;
 		signal s_ball_y : integer range 0 to 480 := 240;
-		signal s_x_speed : integer range -128 to 128 := 1;
+		signal s_x_speed : integer range -128 to 128 := 5;
 		signal s_y_speed : integer range -128 to 128 := 2;
 		
 begin
@@ -51,21 +51,22 @@ begin
 	process(game_clock)
 	begin
 		if rising_edge(game_clock) then
-			if (l_up = '0') then
+			if (l_up = '0' and s_l_paddle > TBOUND+PADDLE_SPEED) then
 				s_l_paddle <= s_l_paddle - PADDLE_SPEED;
-			elsif (l_down = '0') then
+			elsif (l_down = '0' and  s_l_paddle < BBOUND - PADDLE_SPEED) then
 				s_l_paddle <= s_l_paddle + PADDLE_SPEED;
 			end if;
 			
-			if (r_up = '0') then
+			if (r_up = '0' and s_r_paddle > TBOUND+PADDLE_SPEED) then
 				s_r_paddle <= s_r_paddle - PADDLE_SPEED;
-			elsif (r_down = '0') then
+			elsif (r_down = '0' and s_r_paddle > TBOUND+PADDLE_SPEED) then
 				s_r_paddle <= s_r_paddle + PADDLE_SPEED;
 			end if;
 
 			-- Check the left paddle
 			if ((s_ball_x + s_x_speed) < LBOUND) then
-				if ((s_l_paddle - s_ball_y) < (PADDLE_HEIGHT/2)) then
+				if ( (s_l_paddle - s_ball_y) < (PADDLE_HEIGHT/2)
+					and (s_ball_y-s_l_paddle  ) < (PADDLE_HEIGHT/2)) then
 					s_x_speed <= -s_x_speed;
 					s_ball_x <= LBOUND + LBOUND - (s_ball_x + s_x_speed);
 				else
@@ -78,7 +79,8 @@ begin
 			
 			-- Check the right paddle
 			if ((s_ball_x + s_x_speed) > RBOUND) then
-				if ((s_r_paddle - s_ball_y) < (PADDLE_HEIGHT/2)) then
+				if ((s_r_paddle - s_ball_y) < (PADDLE_HEIGHT/2)
+				and (s_ball_y-s_r_paddle  ) < (PADDLE_HEIGHT/2)) then
 					s_x_speed <= -s_x_speed;
 					s_ball_x <= RBOUND - ((s_ball_x + s_x_speed) - RBOUND);
 				else
