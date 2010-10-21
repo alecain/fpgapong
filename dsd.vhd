@@ -41,7 +41,7 @@ architecture vg OF dsd IS
 		 CONSTANT VFP : integer := 10; --Front porch (vertical)
        CONSTANT VBP : integer := 33; --Back porch (vertical)
 		
-		 CONSTANT GAME_CLOCK_DIV : integer := 100000;
+		 CONSTANT GAME_CLOCK_DIV : integer := 1000000;
 		
 		 component renderer
 		 PORT (

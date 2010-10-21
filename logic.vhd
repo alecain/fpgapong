@@ -10,13 +10,13 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 ENTITY logic IS
 	generic (
 		LBOUND : 			integer := 40;
-		RBOUND : 			integer := 550;
-		TBOUND : 			integer := 20;
-		BBOUND : 			integer := 440;
+		RBOUND : 			integer := 578;
+		TBOUND : 			integer := 10;
+		BBOUND : 			integer := 455;
 		PADDLE_HEIGHT : 	integer := 80;
 		PADDLE_WIDTH : 	integer := 10;
 		BALL_RADIUS : 		integer := 10;
-		PADDLE_SPEED :		integer := 1
+		PADDLE_SPEED :		integer := 3
 	);
 
 PORT (
@@ -36,8 +36,8 @@ END logic;
 architecture behavioral of logic is
 		signal s_l_paddle : integer range 0 to 480 := 0;
 		signal s_r_paddle : integer range 0 to 480 := 0;
-		signal s_ball_x : integer range 0 to 640 := 0;
-		signal s_ball_y : integer range 0 to 480 := 0;
+		signal s_ball_x : integer range 0 to 640 := 320;
+		signal s_ball_y : integer range 0 to 480 := 240;
 		signal s_x_speed : integer range -128 to 128 := 1;
 		signal s_y_speed : integer range -128 to 128 := 2;
 		
@@ -63,7 +63,37 @@ begin
 				s_r_paddle <= s_r_paddle + PADDLE_SPEED;
 			end if;
 
-			s_ball_x <= s_ball_x + s_x_speed;
+			-- Check the left paddle
+			if ((s_ball_x + s_x_speed) < LBOUND) then
+				if ((s_l_paddle - s_ball_y) < (PADDLE_HEIGHT/2)) then
+					s_x_speed <= -s_x_speed;
+					s_ball_x <= LBOUND + LBOUND - (s_ball_x + s_x_speed);
+				else
+					s_ball_x <= 320;
+					s_ball_y <= 240;
+				end if;
+			else
+				s_ball_x <= s_ball_x + s_x_speed;
+			end if;
+			
+			-- Check the right paddle
+			if ((s_ball_x + s_x_speed) > RBOUND) then
+				if ((s_r_paddle - s_ball_y) < (PADDLE_HEIGHT/2)) then
+					s_x_speed <= -s_x_speed;
+					s_ball_x <= RBOUND - ((s_ball_x + s_x_speed) - RBOUND);
+				else
+					s_ball_x <= 320;
+					s_ball_y <= 240;
+				end if;
+			else
+				s_ball_x <= s_ball_x + s_x_speed;
+			end if;
+			
+			-- Check the top and bottom
+			if ((s_ball_y + s_y_speed) < TBOUND or (s_ball_y + s_y_speed) > BBOUND) then
+				s_y_speed <= -s_y_speed;			
+			end if;
+
 			s_ball_y <= s_ball_y + s_y_speed;
 			
 			
