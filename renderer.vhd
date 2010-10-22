@@ -23,10 +23,7 @@ PORT (
 			lpaddle			:in integer;
 			rpaddle			:in integer;
 			ballx				:in integer;
-			bally				:in integer;
-			
-			LEDR : OUT std_logic_vector(17 downto 0)
-
+			bally				:in integer
 			
 		);
 END renderer;

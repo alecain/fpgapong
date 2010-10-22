@@ -15,7 +15,9 @@ PORT (CLOCK_50 : IN std_logic;          --50Mhz clock
       VGA_SYNC : OUT std_logic;
       VGA_HS : OUT std_logic; 
       VGA_VS : OUT std_logic;
-		LEDR : OUT std_logic_vector(17 downto 0)
+		LEDR : OUT std_logic_vector(17 downto 0);
+		PS2_DAT : IN std_logic;
+		PS2_CLK : IN std_logic
 		);
 END dsd;
 
@@ -56,9 +58,7 @@ architecture vg OF dsd IS
 			lpaddle			:in integer;
 			rpaddle			:in integer;
 			ballx				:in integer;
-			bally				:in integer;
-
-			LEDR : OUT std_logic_vector(17 downto 0)
+			bally				:in integer
 			
 		  );
 		END component;
@@ -74,6 +74,20 @@ architecture vg OF dsd IS
 			l_down			: IN  std_logic;
 			r_up				: IN  std_logic;
 			r_down			: IN	std_logic
+		);
+		end component;
+		
+		component keyboard
+		PORT(
+			kb_clk			: IN  std_logic;
+			kb_data			: IN  std_logic;
+			l_down			: OUT std_logic;
+			l_up				: OUT std_logic;
+			r_down			: OUT std_logic;
+			r_up				: OUT std_logic;
+			
+			
+			led				: OUT std_logic_vector ( 17 downto 0)
 		);
 		end component;
 
@@ -96,6 +110,11 @@ architecture vg OF dsd IS
 		signal pixel_B		: std_logic_vector (9 downto 0);
 		signal frame_sync		: std_logic;
 		
+		signal l_up : std_logic;
+		signal l_down : std_logic;
+		signal r_up : std_logic;
+		signal r_down : std_logic;
+		
   BEGIN
   
 	U1 : renderer
@@ -111,8 +130,7 @@ architecture vg OF dsd IS
 			lpaddle		=> l_paddle,
 			rpaddle		=> r_paddle,
 			ballx			=> ball_x,
-			bally			=> ball_y,
-			LEDR			=> LEDR
+			bally			=> ball_y
 		  );
 	U2 : logic
 	
@@ -122,11 +140,24 @@ architecture vg OF dsd IS
 		ball_x 			=>ball_x,
 		ball_y 			=>ball_y,
 		game_clock		=>game_clk,
-		l_up				=>KEY(3),
-		l_down			=>KEY(2),
-		r_up				=>KEY(1),
-		r_down			=>KEY(0)
+		l_up				=>l_up,
+		l_down			=>l_down,
+		r_up				=>r_up,
+		r_down			=>r_down
 	);
+	
+	U3 : keyboard
+	PORT MAP (
+			kb_clk			=> PS2_CLK,
+			kb_data			=> PS2_DAT,
+			l_down			=> l_down,
+			l_up				=> l_up,
+			r_down			=> r_down,
+			r_up				=> r_up,
+			
+			
+			led				=> LEDR
+		);
 
   
   
