@@ -17,7 +17,15 @@ PORT (CLOCK_50 : IN std_logic;          --50Mhz clock
       VGA_VS : OUT std_logic;
 		LEDR : OUT std_logic_vector(17 downto 0);
 		PS2_DAT : IN std_logic;
-		PS2_CLK : IN std_logic
+		PS2_CLK : IN std_logic;
+		HEX0 : OUT std_logic_vector(6 downto 0);
+		HEX1 : OUT std_logic_vector(6 downto 0);
+		HEX2 : OUT std_logic_vector(6 downto 0);
+		HEX3 : OUT std_logic_vector(6 downto 0);
+		HEX4 : OUT std_logic_vector(6 downto 0);
+		HEX5 : OUT std_logic_vector(6 downto 0);
+		HEX6 : OUT std_logic_vector(6 downto 0);
+		HEX7 : OUT std_logic_vector(6 downto 0)
 		);
 END dsd;
 
@@ -37,7 +45,7 @@ architecture vg OF dsd IS
 		 
 		 --vertical consts (in lines)
 		 
-		 CONSTANT FRAME_TIME: integer := 525;
+		 CONSTANT FRAME_TIME: integer := 525;  
 		 CONSTANT VSYNC_TIME : integer := 2; -- V_Sync pulse lenght 
        CONSTANT V_VIDEO_TIME: integer := 480;
 		 CONSTANT VFP : integer := 10; --Front porch (vertical)
@@ -47,7 +55,8 @@ architecture vg OF dsd IS
 		
 		 component renderer
 		 PORT (
-			clk_in 			: IN std_logic;
+			x 					: IN integer range 0 to 640;
+			y 					: IN integer range 0 to 480;
 			frame_sync		: in std_logic;
 			enable			: in std_logic;
 			
@@ -73,28 +82,37 @@ architecture vg OF dsd IS
 			l_up				: IN  std_logic;
 			l_down			: IN  std_logic;
 			r_up				: IN  std_logic;
-			r_down			: IN	std_logic
+			r_down			: IN	std_logic;
+			l_score			: OUT integer range 0 to 99;
+			r_score			: OUT integer range 0 to 99
 		);
 		end component;
 		
-		component keyboard
+		component keyb
 		PORT(
-			kb_clk			: IN  std_logic;
-			kb_data			: IN  std_logic;
+			keyboard_clk	: IN  std_logic;
+			keyboard_data	: IN  std_logic;
+			clock_25Mhz		: IN  std_logic;
 			l_down			: OUT std_logic;
 			l_up				: OUT std_logic;
 			r_down			: OUT std_logic;
 			r_up				: OUT std_logic;
-			
-			
-			led				: OUT std_logic_vector ( 17 downto 0)
+			led				: OUT std_logic_vector(17 downto 0)
+		);
+		END component;
+		
+		component DISPLAY_DECODER
+		PORT(			
+			value		: IN  integer range 0 to 9;
+			update	: IN std_logic;
+			display	: OUT std_logic_vector(6 downto 0)
 		);
 		end component;
-
+		
 		--signals for vgabuffer
 		signal send_pixels	: std_logic;
 		
-		signal l_paddle			:  integer range 0 to 480;
+		signal l_paddle		:  integer range 0 to 480;
 		signal r_paddle  		:  integer range 0 to 480;
 		signal ball_x 			:  integer range 0 to 640;
 		signal ball_y 			:  integer range 0 to 480;
@@ -110,16 +128,27 @@ architecture vg OF dsd IS
 		signal pixel_B		: std_logic_vector (9 downto 0);
 		signal frame_sync		: std_logic;
 		
-		signal l_up : std_logic;
+  		signal l_up : std_logic;
 		signal l_down : std_logic;
 		signal r_up : std_logic;
 		signal r_down : std_logic;
 		
+		signal k_ready : std_logic;
+		signal l_score	: integer range 0 to 99;
+		signal r_score	: integer range 0 to 99;
+  
+  
   BEGIN
+  
+	LEDR(17 downto 11) <= conv_std_logic_vector(l_score,7);
+	LEDR(10 downto 4) <= conv_std_logic_vector(r_score,7);
+	
+ 
   
 	U1 : renderer
 	PORT MAP(
-			clk_in 		=> CLOCK_25,
+			x 				=> horizontal_counter-HBP-HSYNC_TIME,
+			y				=> vertical_counter-VBP-VSYNC_TIME,
 			frame_sync 	=>frame_sync,
 			enable  		=>send_pixels,
 			
@@ -132,36 +161,71 @@ architecture vg OF dsd IS
 			ballx			=> ball_x,
 			bally			=> ball_y
 		  );
+		  
 	U2 : logic
-	
 	PORT MAP(
 		l_paddle			=>l_paddle,
 		r_paddle  		=>r_paddle,
 		ball_x 			=>ball_x,
 		ball_y 			=>ball_y,
 		game_clock		=>game_clk,
+		--l_up				=>KEY(3),
+		--l_down			=>KEY(2),
+		--r_up				=>KEY(1),
+		--r_down			=>KEY(0),
 		l_up				=>l_up,
 		l_down			=>l_down,
 		r_up				=>r_up,
-		r_down			=>r_down
+		r_down			=>r_down,
+		l_score			=>l_score,
+		r_score			=>r_score
 	);
 	
-	U3 : keyboard
-	PORT MAP (
-			kb_clk			=> PS2_CLK,
-			kb_data			=> PS2_DAT,
+	U3 : keyb
+	PORT MAP(
+			keyboard_clk	=> PS2_CLK,
+			keyboard_data	=> PS2_DAT,
+			clock_25Mhz 	=> CLOCK_25,
 			l_down			=> l_down,
 			l_up				=> l_up,
 			r_down			=> r_down,
-			r_up				=> r_up,
-			
-			
-			led				=> LEDR
-		);
-
-  
+			r_up				=> r_up
+	
+	);
+		
+	U4 : DISPLAY_DECODER
+	PORT MAP(			
+			value		=> r_score mod 10,
+			update	=> CLOCK_25,
+			display	=> HEX4
+	);
+	
+	U5 : DISPLAY_DECODER
+	PORT MAP(			
+			value		=> r_score/10,
+			update	=> CLOCK_25,
+			display	=> HEX5
+	);
+	
+	U6 : DISPLAY_DECODER
+	PORT MAP(			
+			value		=> l_score mod 10,
+			update	=> CLOCK_25,
+			display	=> HEX6
+	);
+	
+	U7 : DISPLAY_DECODER
+	PORT MAP(			
+			value		=> l_score/10,
+			update	=> CLOCK_25,
+			display	=> HEX7
+	);
   
   VGA_SYNC<= '0';
+  HEX0 <= "1111111";
+  HEX1 <= "1111111";
+  HEX2 <= "1111111";
+  HEX3 <= "1111111";
   
 	--generate a 2Hz clock
 	process (CLOCK_50)
