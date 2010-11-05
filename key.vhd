@@ -1,7 +1,7 @@
 LIBRARY IEEE;
-USE  IEEE.STD_LOGIC_1164.all;
-USE  IEEE.STD_LOGIC_ARITH.all;
-USE  IEEE.STD_LOGIC_UNSIGNED.all;
+USE  IEEE.STD_LOGIC_1164.ALL;
+USE  IEEE.STD_LOGIC_ARITH.ALL;
+USE  IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 ENTITY keyb IS
 	PORT(	keyboard_clk	: IN  std_logic;
@@ -109,7 +109,7 @@ BEGIN
 			last_code <= scan_code;
 
 			IF keyup = '1' THEN
-				keyup <='0';
+				keyup <= '0';
 					
 				IF    scan_code = LUP   THEN slup   <= '0';
 				ELSIF scan_code = LDOWN THEN sldown <= '0';

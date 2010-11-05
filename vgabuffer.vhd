@@ -8,62 +8,58 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 
 ENTITY vgabuffer IS
-	generic(
-			depth: integer := 1
-			  );
-PORT (
-			clk_in 			: IN std_logic;
-			frame_ready		: in std_logic;
-			
-			frame_sync		: IN std_logic;
-			clk_out			: IN std_logic;
+	GENERIC(
+		DEPTH : INTEGER := 1
+	);
 
-			srl_in			: IN std_logic_vector (3*depth-1 downto 0);
-			srl_out			: OUT std_logic_vector (3*depth-1 downto 0)
+	PORT (
+		clk_in 			: IN  STD_LOGIC;
+		frame_ready		: in  STD_LOGIC;
 
-		);
+		frame_sync		: IN  STD_LOGIC;
+		clk_out			: IN  STD_LOGIC;
+
+		srl_in			: IN  STD_LOGIC_VECTOR(3*DEPTH - 1 DOWNTO 0);
+		srl_out			: OUT STD_LOGIC_VECTOR(3*DEPTH - 1 DOWNTO 0)
+	);
 END vgabuffer;
 
 
-architecture behavioral of vgabuffer is
-		
-		signal buffer_in: std_logic_vector (3*depth*640*480-1 downto 0);
-		signal frame: std_logic_vector (3*depth*640*480-1 downto 0);
-		signal buffer_out: std_logic_vector (3*depth*640*480-1 downto 0);
-begin
-	process(clk_in)
-	begin
-		if rising_edge(clk_in) then
+ARCHITECTURE behavioral OF vgabuffer IS
+	SIGNAL buffer_in	: STD_LOGIC_VECTOR(3*DEPTH*640*480 - 1 DOWNTO 0);
+	SIGNAL frame		: STD_LOGIC_VECTOR(3*DEPTH*640*480 - 1 DOWNTO 0);
+	SIGNAL buffer_out	: STD_LOGIC_VECTOR(3*DEPTH*640*480 - 1 DOWNTO 0);
+BEGIN
+	PROCESS(clk_in)
+	BEGIN
+		IF RISING_EDGE(clk_in) THEN
 			--shift data in
-			buffer_in(3*depth*640*480-1 downto 3*depth) <= buffer_in(3*depth*640*480-3*depth-1 downto 0);
-			buffer_in(3*depth-1 downto 0) <=srl_in;
-		end if;	
-	end process;
+			buffer_in(3*DEPTH*640*480 - 1 DOWNTO 3*DEPTH) <= buffer_in(3*DEPTH*640*480 - 3*DEPTH - 1 DOWNTO 0);
+			buffer_in(3*DEPTH - 1 DOWNTO 0) <= srl_in;
+		END IF;	
+	END PROCESS;
 	
-	process (frame_ready)
-	begin
-		if rising_edge(frame_ready) then
-			frame<= buffer_in;
-		end if;	
-	end process;
+	PROCESS (frame_ready)
+	BEGIN
+		IF RISING_EDGE(frame_ready) THEN
+			frame <= buffer_in;
+		END IF;
+	END PROCESS;
 	
-	process (frame_sync)
-	begin 
-		if rising_edge(frame_sync) then
-			buffer_out<= frame;
-		end if;	
-	end process;
+	PROCESS (frame_sync)
+	BEGIN
+		IF RISING_EDGE(frame_sync) THEN
+			buffer_out <= frame;
+		END IF;
+	END PROCESS;
 		
-	process(clk_out)
-	begin 
-		if rising_edge(clk_out) then
+	PROCESS(clk_out)
+	BEGIN
+		IF RISING_EDGE(clk_out) THEN
 				--shift data out
-				buffer_out(3*depth*640*480-1 downto 3*depth) <= buffer_in(3*depth*640*480-3*depth-1 downto 0);
-				
-		end if;	
-	end process;
+				buffer_out(3*DEPTH*640*480 - 1 DOWNTO 3*DEPTH) <= buffer_in(3*DEPTH*640*480 - 3*DEPTH - 1 DOWNTO 0);
+		END IF;
+	END PROCESS;
 
-	srl_out<=buffer_out(3*depth*640*480-1 downto 3*depth*640*480-3*depth-1);
-	
-	
-end architecture;
+	srl_out <= buffer_out(3*DEPTH*640*480 - 1 DOWNTO 3*DEPTH*640*480 - 3*DEPTH - 1);
+END architecture;
