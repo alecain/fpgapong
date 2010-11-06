@@ -118,10 +118,10 @@ BEGIN
 			-- Check the right paddle
 			ELSIF (s_ball_x + s_x_speed) > RBOUND THEN
 				IF (s_r_paddle - s_ball_y) < (PADDLE_HEIGHT/2)
-						AND (s_ball_y-s_r_paddle) < (PADDLE_HEIGHT/2) THEN
+						AND (s_ball_y - s_r_paddle) < (PADDLE_HEIGHT/2) THEN
 					s_x_speed <= -s_x_speed;
 					s_y_speed <= s_y_speed + r_paddle_speed/2;
-					s_ball_x <= RBOUND - (s_ball_x + s_x_speed) - RBOUND;
+					s_ball_x <= RBOUND - ((s_ball_x + s_x_speed) - RBOUND);
 					s_ball_y <= s_ball_y + s_y_speed;
 
 				ELSE

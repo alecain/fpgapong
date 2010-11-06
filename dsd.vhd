@@ -45,10 +45,12 @@ ARCHITECTURE vg OF dsd IS
 	CONSTANT VFP				: INTEGER := 10; 	--Front porch (vertical)
 	CONSTANT VBP				: INTEGER := 33; 	--Back porch (vertical)
 	CONSTANT GAME_CLOCK_DIV	: INTEGER := 1000000;
+	
 
 	SIGNAL clock_25				: STD_LOGIC;	--25Mhz clock
 	SIGNAL horizontal_counter	: INTEGER RANGE 0 TO 794;
 	SIGNAL vertical_counter		: INTEGER RANGE 0 TO 525;
+	SIGNAL frames					: INTEGER;
 
 	--signals for vgabuffer
 
