@@ -16,6 +16,7 @@ PORT (CLOCK_50 : IN std_logic;          --50Mhz clock
       VGA_HS : OUT std_logic; 
       VGA_VS : OUT std_logic;
 		LEDR : OUT std_logic_vector(17 downto 0);
+		LEDG : OUT std_logic_vector(7 downto 0);
 		PS2_DAT : IN std_logic;
 		PS2_CLK : IN std_logic;
 		HEX0 : OUT std_logic_vector(6 downto 0);
@@ -136,12 +137,13 @@ architecture vg OF dsd IS
 		signal k_ready : std_logic;
 		signal l_score	: integer range 0 to 99;
 		signal r_score	: integer range 0 to 99;
+		
+		signal TEST_DONE	:	std_logic :='0';
+		signal TEST_FAIL	:	std_logic :='1';
   
   
   BEGIN
   
-	LEDR(17 downto 11) <= conv_std_logic_vector(l_score,7);
-	LEDR(10 downto 4) <= conv_std_logic_vector(r_score,7);
 	
  
   
@@ -214,12 +216,20 @@ architecture vg OF dsd IS
 			display	=> HEX6
 	);
 	
-	U7 : DISPLAY_DECODER
-	PORT MAP(			
-			value		=> l_score/10,
-			update	=> CLOCK_25,
-			display	=> HEX7
-	);
+	--U7 : DISPLAY_DECODER
+	--PORT MAP(			
+	--		value		=> l_score/10,
+	--		update	=> CLOCK_25,
+	--		display	=> HEX7
+	--);
+	
+	U7: entity WORK.DISPLAY_DECODER_BIST
+		port map(l_score/10, CLOCK_25 , HEX7 , (not KEY(0)) ,TEST_DONE, TEST_FAIL);
+	
+	LEDR(0)<= TEST_DONE and (TEST_FAIL);
+	LEDG(0)<= TEST_DONE and (not TEST_FAIL);
+	
+	
   
   VGA_SYNC<= '0';
   HEX0 <= "1111111";
