@@ -27,6 +27,7 @@ BEGIN
 			ELSIF (value = 7) THEN display <= "1111000";
 			ELSIF (value = 8) THEN display <= "0000000";
 			ELSIF (value = 9) THEN display <= "0011000";
+			ELSE                   display <= "0000000";
 			END IF;
 		END IF;
 	END process;
