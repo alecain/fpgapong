@@ -77,6 +77,9 @@ ARCHITECTURE vg OF dsd IS
 	SIGNAL k_ready 	: STD_LOGIC;
 	SIGNAL l_score		: INTEGER RANGE 0 TO 99;
 	SIGNAL r_score		: INTEGER RANGE 0 TO 99;
+		
+	signal TEST_DONE	:	std_logic :='0';
+	signal TEST_FAIL	:	std_logic :='1';
 
 
 	COMPONENT renderer
@@ -203,12 +206,17 @@ BEGIN
 			display	=> hex6
 	);
 
-	U7 : DISPLAY_DECODER
-	PORT MAP(
-			value		=> l_score/10,
-			update	=> clock_25,
-			display	=> hex7
-	);
+	--U7 : DISPLAY_DECODER
+	--PORT MAP(
+	--		value		=> l_score/10,
+	--		update	=> clock_25,
+	--		display	=> hex7
+	--);
+	
+	U7: entity WORK.DISPLAY_DECODER_BIST
+		port map(l_score/10, CLOCK_25 , HEX7 , (not KEY(0)) ,TEST_DONE, TEST_FAIL);
+	
+	LEDR(0)<= TEST_DONE and (TEST_FAIL);
 
 	vga_sync <= '0';
 
