@@ -17,6 +17,7 @@ ENTITY dsd IS
 			vga_hs		: OUT STD_LOGIC;
 			vga_vs		: OUT STD_LOGIC;
 			ledr			: OUT STD_LOGIC_VECTOR(17 DOWNTO 0);
+			ledg		 	: OUT std_logic_vector(7 downto 0);
 			ps2_dat		: IN  STD_LOGIC;
 			ps2_clk		: IN  STD_LOGIC;
 			hex0 			: OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
@@ -217,6 +218,8 @@ BEGIN
 		port map(l_score/10, CLOCK_25 , HEX7 , (not KEY(0)) ,TEST_DONE, TEST_FAIL);
 	
 	LEDR(0)<= TEST_DONE and (TEST_FAIL);
+	LEDG(0)<= TEST_DONE and (not TEST_FAIL);
+
 
 	vga_sync <= '0';
 
